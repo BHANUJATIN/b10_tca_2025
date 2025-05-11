@@ -33,6 +33,18 @@ app.get('/test-process', async (req, res) => {
   }
 });
 
+const sendPeopleData = require('./services/sendPeopleData');
+
+app.get('/test-people-send', async (req, res) => {
+  try {
+    await sendPeopleData(); // your function that sends to webhooks
+    res.status(200).send("Manual send executed successfully.");
+  } catch (error) {
+    console.error("Manual send error:", error);
+    res.status(500).send("Send failed.");
+  }
+});
+
 
 app.listen(PORT, () => {
   console.log(`Server is listening on port ${PORT}`);
