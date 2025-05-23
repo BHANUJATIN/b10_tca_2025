@@ -1,17 +1,17 @@
 // server/src/workers/processRequests.js
 const pool = require('../config/db');
-const axios = require('axios');
+const fetchPeopleFromLeadmagic = require('../utils/leadmagic');
 
 async function processRequest(request) {
   const client = await pool.connect();
-  const { id, key, category } = request;
+  const { id, key, category, company_domain, role } = request;
 
   try {
-    // Step 1: Call dummy API
-    const response = await axios.get('https://dummyjson.com/c/4e1f-0eba-46cd-bd66');
-    const people = response.data?.results?.people || [];
-
-    // console.log('Raw API response:', JSON.stringify(response, null, 2));
+    // Step 1: Fetch people from Leadmagic
+    const people = await fetchPeopleFromLeadmagic({
+      company_domain,
+      job_title: role
+    });
 
     // Step 2: Insert people data
     for (const person of people) {

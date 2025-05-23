@@ -31,7 +31,7 @@ app.get('/test-process', async (req, res) => {
     console.error("Manual poll error:", error);
     res.status(500).send("Polling failed.");
   }
-});
+}); 
 
 const sendPeopleData = require('./services/sendPeopleData');
 
