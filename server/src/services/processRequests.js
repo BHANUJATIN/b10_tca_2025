@@ -1,6 +1,7 @@
 // server/src/workers/processRequests.js
 const pool = require('../config/db');
-const fetchPeopleFromLeadmagic = require('../utils/leadmagic');
+const fetchPeopleFromApollo = require('../utils/apollo');
+// const fetchPeopleFromLeadmagic = require('../utils/leadmagic');
 
 async function processRequest(request) {
   const client = await pool.connect();
@@ -8,7 +9,7 @@ async function processRequest(request) {
 
   try {
     // Step 1: Fetch people from Leadmagic
-    const people = await fetchPeopleFromLeadmagic({
+    const people = await fetchPeopleFromApollo({
       company_domain,
       job_title: role
     });
