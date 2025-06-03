@@ -6,7 +6,8 @@ async function fetchPeopleFromApollo({ company_domain, job_title }) {
     'https://api.apollo.io/api/v1/mixed_people/search',
     {
       q_organization_domains_list: [company_domain],
-      person_titles: [job_title]
+      person_titles: [job_title],
+      per_page: 100
     },
     {
       headers: {
