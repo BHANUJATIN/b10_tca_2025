@@ -1,13 +1,13 @@
 // server/src/workers/pollRequests.js
 const pool = require('../config/db');
-const processRequest  = require('../services/processRequests');
+const processRequest = require('../services/processRequests');
 
 async function pollRequests() {
   const client = await pool.connect();
 
   try {
     const { rows: pendingRequests } = await client.query(
-      `SELECT * FROM clay_requests WHERE status = 'pending' LIMIT 5` // Limit for safety
+      `SELECT * FROM clay_requests WHERE status = 'pending' LIMIT 3` // Limit for safety
     );
 
     for (const req of pendingRequests) {

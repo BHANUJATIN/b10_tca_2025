@@ -9,9 +9,10 @@ async function sendPeopleData() {
     // Step 1: Retrieve the necessary people data with key, category, and webhook URL 1
     const result = await client.query(`
       SELECT pd.id, pd.person_data, pd.sent_to_main, pd.sent_to_icp, cr.webhook_url_1 AS webhook_1, cr.key, cr.category
-      FROM people_data pd
-      JOIN clay_requests cr ON pd.request_key = cr.key
-      WHERE pd.sent_to_main = false OR pd.sent_to_icp = false;
+FROM people_data pd
+JOIN clay_requests cr ON pd.request_key = cr.key
+WHERE pd.sent_to_main = false OR pd.sent_to_icp = false
+LIMIT 1000;
     `);
 
     const peopleData = result.rows;
@@ -44,6 +45,8 @@ async function sendPeopleData() {
           `UPDATE people_data SET sent_to_main = true, sent_time_main = NOW() WHERE id = $1`,
           [data.id]
         );
+        console.log("data updated into webhook_1");
+
       }
 
       // Send to the second webhook (ICP)
