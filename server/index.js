@@ -47,6 +47,26 @@ app.use('/api/v1', v1ClayRoutes);
 const pollAndProcessRequests = require('./src/jobs/pollRequests');
 const sendPeopleData = require('./src/services/sendPeopleData');
 
+app.get('/cron/poll', async (req, res) => {
+  try {
+    await pollAndProcessRequests();
+    res.status(200).send("Polling job ran successfully.");
+  } catch (error) {
+    console.error("Polling job error:", error);
+    res.status(500).send("Polling job failed.");
+  }
+});
+
+app.get('/cron/send', async (req, res) => {
+  try {
+    await sendPeopleData();
+    res.status(200).send("Sending job ran successfully.");
+  } catch (error) {
+    console.error("Sending job error:", error);
+    res.status(500).send("Sending job failed.");
+  }
+});
+
 // Manual Test Routes
 app.get('/test-process', async (req, res) => {
   try {
@@ -67,6 +87,8 @@ app.get('/test-people-send', async (req, res) => {
     res.status(500).send("Send failed.");
   }
 });
+
+
 
 // Start server
 app.listen(PORT, () => {
