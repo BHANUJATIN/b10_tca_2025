@@ -1,6 +1,7 @@
 // server/src/workers/processRequests.js
 const pool = require('../config/db');
 const fetchPeopleFromApollo = require('../utils/apollo');
+const sendToWebhookInBatches = require('../utils/webhookSender');
 
 async function processRequest(request) {
   const { id, key, category, company_domain, role } = request;
@@ -49,6 +50,8 @@ async function processRequest(request) {
 
     await client.query('COMMIT');
     console.log(`✅ Processed ${people.length} people for request key: ${key}`);
+
+    await sendToWebhookInBatches({ requestKey: key });
 
   } catch (err) {
     console.error(`❌ Failed to fully process request key: ${key}`, err.stack || err.message);

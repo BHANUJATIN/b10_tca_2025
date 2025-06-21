@@ -27,7 +27,8 @@ async function fetchPeopleFromApollo({ company_domain, job_titles }) {
             q_organization_domains_list: [company_domain],
             person_titles: job_titles,
             per_page: perPage,
-            page: page
+            page: page,
+            organization_locations: ["USA", "United States"]
           },
           {
             headers: {
