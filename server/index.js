@@ -22,7 +22,7 @@ const sendPeopleData = require('./src/services/sendPeopleData');
 
 app.post('/test/test-request', async (req, res) => {
   try {
-    await pollAndProcessRequests();
+    pollAndProcessRequests();
     res.status(200).send("Polling job ran successfully.");
   } catch (error) {
     console.error("Polling job error:", error);
