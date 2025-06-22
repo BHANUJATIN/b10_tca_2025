@@ -22,8 +22,8 @@ const sendPeopleData = require('./src/services/sendPeopleData');
 
 app.post('/test/test-request', async (req, res) => {
   try {
-    pollAndProcessRequests();
-    res.status(200).send("Polling job ran successfully.");
+    await pollAndProcessRequests();
+    res.status(200).send("Polling job started.");
   } catch (error) {
     console.error("Polling job error:", error);
     res.status(500).send("Polling job failed.");
