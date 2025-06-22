@@ -9,7 +9,7 @@ function wait(ms) {
 async function fetchPeopleFromApollo({ company_domain, job_titles }) {
   const perPage = 100;
   const maxPages = 500;
-  const maxPeople = 1000;
+  const maxPeople = 700; // change it to 1000
   let page = 1;
   let totalPages = 1;
   const allPeople = [];
