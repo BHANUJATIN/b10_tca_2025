@@ -8,7 +8,7 @@ async function sendToWebhookInBatches({ requestKey, batchSize = 10 }) {
   try {
     // Step 1: Get request meta info (main webhook + category)
     const requestResult = await client.query(
-      `SELECT webhook_url_1, category FROM clay_requests WHERE request_key = $1 LIMIT 1`,
+      `SELECT webhook_url_1, category FROM clay_requests WHERE key = $1 LIMIT 1`,
       [requestKey]
     );
 
