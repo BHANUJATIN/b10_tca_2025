@@ -7,7 +7,7 @@ async function pollRequests() {
 
   try {
     const { rows: pendingRequests } = await client.query(
-      `SELECT * FROM clay_requests WHERE status = 'pending' LIMIT 3` // Limit for safety
+      `SELECT * FROM clay_requests WHERE status = 'pending' ORDER BY created_at ASC LIMIT 3` // Limit for safety
     );
 
     for (const req of pendingRequests) {

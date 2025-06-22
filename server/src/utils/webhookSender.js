@@ -29,47 +29,67 @@ async function sendToWebhookInBatches({ requestKey, batchSize = 10 }) {
       console.warn(`⚠️ No ICP webhook found for category: ${category}`);
     }
 
-    // Step 3: Get unsent people for this request
+    // Step 3: Get unsent + not in-progress people
     const { rows: peopleRows } = await client.query(
-      `SELECT id, person_data, sent_to_main, sent_to_icp FROM people_data WHERE request_key = $1 AND (sent_to_main = false OR sent_to_icp = false)`,
-      [requestKey]
+      `SELECT id, person_data, sent_to_main, sent_to_icp
+       FROM people_data
+       WHERE request_key = $1
+         AND (sent_to_main = false OR sent_to_icp = false)
+         AND sending_in_progress = false
+       LIMIT $2`,
+      [requestKey, batchSize * 5] // Load more than batch size to allow for batching
     );
 
     for (let i = 0; i < peopleRows.length; i += batchSize) {
       const batch = peopleRows.slice(i, i + batchSize);
 
-      // Send to each webhook in batch
       for (const person of batch) {
+        const { id, person_data, sent_to_main, sent_to_icp } = person;
         const payload = {
           key: requestKey,
           category,
-          person_data: person.person_data,
+          person_data,
         };
 
-        // Send to Main Webhook
-        if (!person.sent_to_main && webhook_url_1) {
-          try {
-            await axios.post(webhook_url_1, payload);
-            await client.query(
-              `UPDATE people_data SET sent_to_main = true, sent_time_main = NOW() WHERE id = $1`,
-              [person.id]
-            );
-          } catch (err) {
-            console.warn(`⚠️ Failed to send to webhook_1 for person ${person.id}:`, err.message);
-          }
-        }
+        // Mark as in progress before sending
+        await client.query(
+          `UPDATE people_data SET sending_in_progress = true WHERE id = $1`,
+          [id]
+        );
 
-        // Send to ICP Webhook
-        if (!person.sent_to_icp && webhook_url_2) {
-          try {
-            await axios.post(webhook_url_2, payload);
-            await client.query(
-              `UPDATE people_data SET sent_to_icp = true, sent_time_icp = NOW() WHERE id = $1`,
-              [person.id]
-            );
-          } catch (err) {
-            console.warn(`⚠️ Failed to send to webhook_2 for person ${person.id}:`, err.message);
+        try {
+          // Main webhook
+          if (!sent_to_main && webhook_url_1) {
+            try {
+              await axios.post(webhook_url_1, payload);
+              await client.query(
+                `UPDATE people_data SET sent_to_main = true, sent_time_main = NOW() WHERE id = $1`,
+                [id]
+              );
+            } catch (err) {
+              console.warn(`⚠️ Failed to send to webhook_1 for person ${id}:`, err.message);
+            }
           }
+
+          // ICP webhook
+          if (!sent_to_icp && webhook_url_2) {
+            try {
+              await axios.post(webhook_url_2, payload);
+              await client.query(
+                `UPDATE people_data SET sent_to_icp = true, sent_time_icp = NOW() WHERE id = $1`,
+                [id]
+              );
+            } catch (err) {
+              console.warn(`⚠️ Failed to send to webhook_2 for person ${id}:`, err.message);
+            }
+          }
+
+        } finally {
+          // Always reset in-progress flag regardless of outcome
+          await client.query(
+            `UPDATE people_data SET sending_in_progress = false WHERE id = $1`,
+            [id]
+          );
         }
       }
     }
